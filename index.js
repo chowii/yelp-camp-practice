@@ -4,7 +4,8 @@ const mongoose = require('mongoose')
 const ApiError = require('./error/ApiError')
 const catchAsync = require('./error/catchAsync')
 const {campgroundSchema} = require("./campground/data/campgroundSchema");
-const campground = require("./campground/data/campgroundModel");
+const CampgroundModel = require("./campground/data/campgroundModel");
+const ReviewModel = require('./review/data/reviewModel')
 const PORT = 3000
 const app = express()
 
@@ -37,29 +38,40 @@ const validateCampground = (req, res, next) => {
 }
 
 app.get('/', catchAsync(async (req, res) => {
-    const camps = await campground.find({})
+    const camps = await CampgroundModel.find({})
     res.status(200).json(camps)
 }))
 
 app.post('/new', validateCampground, catchAsync(async (req, res) => {
-    const newCamp = new campground(req.body.campground)
+    const newCamp = new CampgroundModel(req.body.campground)
     await newCamp.save()
     res.status(200).redirect(`/${newCamp.id}`)
 }))
 
 app.put('/edit/:id', validateCampground, catchAsync(async (req, res) => {
-    const editCamp = await campground.findByIdAndUpdate({_id: req.params.id}, {...req.body.campground})
+    const editCamp = await CampgroundModel.findByIdAndUpdate({_id: req.params.id}, {...req.body.campground})
     res.status(200).redirect(`/${editCamp._id}`)
 }))
 
 app.get('/:id', catchAsync(async (req, res) => {
-    const camp = await campground.findById(req.params.id)
+    const camp = await CampgroundModel.findById(req.params.id)
     res.status(200).json(camp)
 }))
 
 app.delete('/:id', catchAsync(async (req, res) => {
-    await campground.findByIdAndDelete({_id: req.params.id})
+    await CampgroundModel.findByIdAndDelete({_id: req.params.id})
     res.status(200).redirect('/')
+}))
+
+app.post('/:id/reviews', catchAsync(async (req, res) => {
+    const campground = await CampgroundModel.findById(req.params.id)
+    const review = new ReviewModel(req.body.review);
+    console.log(review, campground)
+    campground.reviews.push(review);
+    await review.save()
+    await campground.save()
+    res.redirect(`/${campground._id}`)
+    console.log(campground)
 }))
 
 app.all('*', (req, res, next) => {
