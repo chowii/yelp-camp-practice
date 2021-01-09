@@ -1,6 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const campgroundRoute = require('./campground/routes')
+const ApiError = require('./error/ApiError')
 const PORT = 3000
 const app = express()
 
@@ -21,6 +22,15 @@ db.once('open', () => {
 app.use(express.json())
 
 app.use('/campgrounds', campgroundRoute)
+
+app.all('*', (req, res, next) => {
+    next(new ApiError('Not Found', 404))
+})
+
+app.use((err, req, res, next) => {
+    const {message = 'Something Went Wrong', statusCode = 500} = err
+    res.status(statusCode).send(message)
+})
 
 app.listen(PORT, () => {
     console.log('LIVE from ', PORT)
