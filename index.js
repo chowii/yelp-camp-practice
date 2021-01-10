@@ -6,6 +6,7 @@ const catchAsync = require('./error/catchAsync')
 const {campgroundSchema} = require("./campground/data/campgroundSchema");
 const CampgroundModel = require("./campground/data/campgroundModel");
 const ReviewModel = require('./review/data/reviewModel')
+const {reviewSchema} = require('./review/data/reviewSchema')
 const PORT = 3000
 const app = express()
 
@@ -38,7 +39,7 @@ const validateCampground = (req, res, next) => {
 }
 
 app.get('/', catchAsync(async (req, res) => {
-    const camps = await CampgroundModel.find({})
+    const camps = await CampgroundModel.find({}).populate('reviews')
     res.status(200).json(camps)
 }))
 
@@ -63,15 +64,25 @@ app.delete('/:id', catchAsync(async (req, res) => {
     res.status(200).redirect('/')
 }))
 
-app.post('/:id/reviews', catchAsync(async (req, res) => {
+const validateReview = (req, res, next) => {
+    let value = req.body;
+    console.log(value)
+    const {error} = reviewSchema.validate(value)
+    if(error) {
+        const errMsg = error.details.map(item => item.message).join(',')
+        throw new ApiError(errMsg, 400)
+    } else {
+        next()
+    }
+}
+
+app.post('/:id/reviews', validateReview, catchAsync(async (req, res) => {
     const campground = await CampgroundModel.findById(req.params.id)
     const review = new ReviewModel(req.body.review);
-    console.log(review, campground)
     campground.reviews.push(review);
     await review.save()
     await campground.save()
     res.redirect(`/${campground._id}`)
-    console.log(campground)
 }))
 
 app.all('*', (req, res, next) => {
