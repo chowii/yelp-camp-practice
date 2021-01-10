@@ -68,7 +68,7 @@ const validateReview = (req, res, next) => {
     let value = req.body;
     console.log(value)
     const {error} = reviewSchema.validate(value)
-    if(error) {
+    if (error) {
         const errMsg = error.details.map(item => item.message).join(',')
         throw new ApiError(errMsg, 400)
     } else {
@@ -83,6 +83,13 @@ app.post('/:id/reviews', validateReview, catchAsync(async (req, res) => {
     await review.save()
     await campground.save()
     res.redirect(`/${campground._id}`)
+}))
+
+app.delete('/:id/reviews/:reviewId', catchAsync(async (req, res) => {
+    const {id: campId, reviewId} = req.params
+    ReviewModel.findByIdAndDelete(reviewId)
+    await CampgroundModel.findByIdAndUpdate(campId, { $pull: { reviews: reviewId }})
+    res.redirect(`/${campId}`)
 }))
 
 app.all('*', (req, res, next) => {
