@@ -43,7 +43,7 @@ app.get('/', catchAsync(async (req, res) => {
     res.status(200).json(camps)
 }))
 
-app.post('/new', validateCampground, catchAsync(async (req, res) => {
+app.post('/', validateCampground, catchAsync(async (req, res) => {
     const newCamp = new CampgroundModel(req.body.campground)
     await newCamp.save()
     res.status(200).redirect(`/${newCamp.id}`)
