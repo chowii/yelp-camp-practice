@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const catchAsync = require('../../error/catchAsync')
 const UserModel = require('../data/userModel')
+const passport = require('passport')
 
 router.post('/register', catchAsync(async (req, res) => {
     const {email, username, password} = req.body
@@ -9,5 +10,14 @@ router.post('/register', catchAsync(async (req, res) => {
     console.log(registeredUser)
     res.send(registeredUser)
 }))
+
+router.post(
+    '/login',
+    passport.authenticate('local', {successRedirect: '/campgrounds'}),
+    (req, res) => {
+    const redirectUrl = req.session.returnTo || '/campgrounds';
+    delete req.session.returnTo;
+    res.redirect(redirectUrl);
+})
 
 module.exports = router
