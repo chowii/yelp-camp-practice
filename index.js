@@ -4,6 +4,11 @@ const mongoose = require('mongoose')
 const campgroundRoute = require('./campground/routes')
 const reviewRoute = require('./review/routes')
 const ApiError = require('./error/ApiError')
+const passport = require('passport')
+const LocalStrategy = require('passport-local')
+const userRoute = require('./user/routes/index')
+const UserModel = require('./user/data/userModel')
+
 const PORT = 3000
 const app = express()
 
@@ -34,6 +39,14 @@ const sessionConfig = {
     }
 }
 app.use(session(sessionConfig))
+
+app.use(passport.initialize())
+app.use(passport.session())
+passport.use(new LocalStrategy(UserModel.authenticate()))
+passport.serializeUser(UserModel.serializeUser())
+passport.deserializeUser(UserModel.deserializeUser())
+
+app.use('/', userRoute)
 app.use('/campgrounds', campgroundRoute)
 app.use('/campgrounds/:id/reviews', reviewRoute)
 
