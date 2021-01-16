@@ -1,4 +1,5 @@
 const express = require('express')
+const session = require('express-session')
 const mongoose = require('mongoose')
 const campgroundRoute = require('./campground/routes')
 const reviewRoute = require('./review/routes')
@@ -22,6 +23,17 @@ db.once('open', () => {
 
 app.use(express.json())
 
+const sessionConfig = {
+    secret: 'UseDifferentSecretForProd',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7
+    }
+}
+app.use(session(sessionConfig))
 app.use('/campgrounds', campgroundRoute)
 app.use('/campgrounds/:id/reviews', reviewRoute)
 
