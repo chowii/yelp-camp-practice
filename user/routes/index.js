@@ -20,4 +20,9 @@ router.post(
     res.redirect(redirectUrl);
 })
 
+router.post('/logout', (req, res) => {
+    req.logout()
+    res.redirect('/campgrounds')
+})
+
 module.exports = router

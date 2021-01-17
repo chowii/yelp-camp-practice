@@ -4,6 +4,7 @@ const CampgroundModel = require('../data/campgroundModel')
 const {campgroundSchema} = require('../data/campgroundSchema')
 const catchAsync = require('../../error/catchAsync')
 const ApiError = require("../../error/ApiError");
+const {isLoggedIn} = require('../../user/isLoggedIn')
 
 const validateCampground = (req, res, next) => {
     const {error} = campgroundSchema.validate(req.body)
@@ -21,13 +22,13 @@ router.get('/', catchAsync(async (req, res) => {
     res.status(200).json(camps)
 }))
 
-router.post('/', validateCampground, catchAsync(async (req, res) => {
+router.post('/', isLoggedIn, validateCampground, catchAsync(async (req, res) => {
     const newCamp = new CampgroundModel(req.body.campground)
     await newCamp.save()
     res.status(200).redirect(`/campgrounds/${newCamp.id}`)
 }))
 
-router.put('/edit/:id', validateCampground, catchAsync(async (req, res) => {
+router.put('/edit/:id', isLoggedIn, validateCampground, catchAsync(async (req, res) => {
     const editCamp = await CampgroundModel.findByIdAndUpdate({_id: req.params.id}, {...req.body.campground})
     res.status(200).redirect(`/${editCamp._id}`)
 }))
@@ -37,7 +38,7 @@ router.get('/:id', catchAsync(async (req, res) => {
     res.status(200).json(camp)
 }))
 
-router.delete('/:id', catchAsync(async (req, res) => {
+router.delete('/:id', isLoggedIn, catchAsync(async (req, res) => {
     await CampgroundModel.findByIdAndDelete({_id: req.params.id})
     res.status(200).redirect('/campgrounds')
 }))
