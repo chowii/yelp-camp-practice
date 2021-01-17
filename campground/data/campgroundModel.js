@@ -11,7 +11,11 @@ const campgroundSchema = new Schema({
     reviews: [{
         type: Schema.Types.ObjectId,
         ref: 'Review'
-    }]
+    }],
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }
 })
 
 campgroundSchema.post('findOneAndDelete', async function (doc) {

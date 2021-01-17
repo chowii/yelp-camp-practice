@@ -24,6 +24,7 @@ router.get('/', catchAsync(async (req, res) => {
 
 router.post('/', isLoggedIn, validateCampground, catchAsync(async (req, res) => {
     const newCamp = new CampgroundModel(req.body.campground)
+    newCamp.author = req.user._id
     await newCamp.save()
     res.status(200).redirect(`/campgrounds/${newCamp.id}`)
 }))
