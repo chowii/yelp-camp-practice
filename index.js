@@ -56,7 +56,12 @@ app.all('*', (req, res, next) => {
 
 app.use((err, req, res, next) => {
     const {message = 'Something Went Wrong', statusCode = 500} = err
-    res.status(statusCode).send(message)
+    res.status(statusCode).send({
+        error: {
+            message: message,
+            code: statusCode
+        }
+    })
 })
 
 app.listen(PORT, () => {

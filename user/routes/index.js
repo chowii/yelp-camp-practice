@@ -13,12 +13,10 @@ router.post('/register', catchAsync(async (req, res) => {
 
 router.post(
     '/login',
-    passport.authenticate('local', {successRedirect: '/campgrounds'}),
+    passport.authenticate('local', {}),
     (req, res) => {
-    const redirectUrl = req.session.returnTo || '/campgrounds';
-    delete req.session.returnTo;
-    res.redirect(redirectUrl);
-})
+        res.send(req.user);
+    })
 
 router.post('/logout', (req, res) => {
     req.logout()

@@ -1,6 +1,6 @@
 module.exports.isLoggedIn = (req, res, next) => {
     if (req.isAuthenticated()) {
-        next()
+       return next()
     }
     return res.status(401).send({
         error: {
