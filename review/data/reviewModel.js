@@ -3,7 +3,11 @@ const { Schema } = mongoose
 
 const reviewModel = new Schema({
     text: String,
-    rating: Number
+    rating: Number,
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }
 })
 
 module.exports = mongoose.model('Review', reviewModel)

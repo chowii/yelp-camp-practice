@@ -5,17 +5,15 @@ const {reviewSchema} = require('../data/reviewSchema')
 const CampgroundModel = require('../../campground/data/campgroundModel')
 const catchAsync = require('../../error/catchAsync')
 const ApiError = require("../../error/ApiError");
+const {isReviewAuthor} = require("../../user/isReviewAuthor");
 const {isLoggedIn} = require('../../user/isLoggedIn')
 
 const validateReview = (req, res, next) => {
-    console.log(`body:`)
     const {error} = reviewSchema.validate(req.body)
     if (error) {
         const errMsg = error.details.map(item => item.message).join(',')
-        console.log('error')
         throw new ApiError(errMsg, 400)
     } else {
-        console.log('next')
         next()
     }
 }
@@ -23,21 +21,25 @@ const validateReview = (req, res, next) => {
 router.post('/', validateReview, isLoggedIn, catchAsync(async (req, res) => {
     const campground = await CampgroundModel.findById(req.params.id)
     const review = new ReviewModel(req.body.review);
-    console.log(req.params.id)
-    console.log('test')
-    console.log(campground)
+   review.author = req.user._id
     campground.reviews.push(review);
     await review.save()
-    console.log('test2')
     await campground.save()
     res.redirect(`/campgrounds/${campground._id}`)
 }))
 
-router.delete('/:reviewId', isLoggedIn, catchAsync(async (req, res) => {
+router.delete('/:reviewId', isLoggedIn, isReviewAuthor, catchAsync(async (req, res) => {
     const {id: campId, reviewId} = req.params
-    ReviewModel.findByIdAndDelete(reviewId)
-    await CampgroundModel.findByIdAndUpdate(campId, {$pull: {reviews: reviewId}})
+    const review = await ReviewModel.findByIdAndDelete(reviewId)
+    const updatedCamp = await CampgroundModel.findByIdAndUpdate(campId, {$pull: {reviews: reviewId}})
+    if (!updatedCamp) {
+        throw new ApiError("Campground Not Found", 404)
+    }
+    if (!review) {
+        throw new ApiError("Review Not Found", 404)
+    }
     res.redirect(`/campgrounds/${campId}`)
+    review.delete()
 }))
 
 module.exports = router;
