@@ -11,7 +11,6 @@ const validateCampground = (req, res, next) => {
     const {error} = campgroundSchema.validate(req.body)
     if (error) {
         const errMsg = error.details.map(item => item.message).join(',')
-        console.log(errMsg)
         throw new ApiError(errMsg, 400)
     } else {
         next()
@@ -36,7 +35,12 @@ router.put('/edit/:id', isLoggedIn, isCampgroundAuthor, validateCampground, catc
 }))
 
 router.get('/:id', catchAsync(async (req, res) => {
-    const camp = await CampgroundModel.findById(req.params.id)
+    const camp = await CampgroundModel.findById(req.params.id).populate({
+        path: 'reviews',
+        populate: {
+            path: 'author'
+        }
+    }).populate('author');
     res.status(200).json(camp)
 }))
 
