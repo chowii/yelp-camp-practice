@@ -4,7 +4,7 @@ const CampgroundModel = require('../data/campgroundModel')
 const {campgroundSchema} = require('../data/campgroundSchema')
 const catchAsync = require('../../error/catchAsync')
 const ApiError = require("../../error/ApiError");
-const {isAuthor} = require("../../user/isAuthor");
+const {isCampgroundAuthor} = require("../../user/isCampgroundAuthor");
 const {isLoggedIn} = require('../../user/isLoggedIn')
 
 const validateCampground = (req, res, next) => {
@@ -30,7 +30,7 @@ router.post('/', isLoggedIn, validateCampground, catchAsync(async (req, res) => 
     res.status(200).redirect(`/campgrounds/${newCamp.id}`)
 }))
 
-router.put('/edit/:id', isLoggedIn, isAuthor, validateCampground, catchAsync(async (req, res) => {
+router.put('/edit/:id', isLoggedIn, isCampgroundAuthor, validateCampground, catchAsync(async (req, res) => {
     const editCamp = await CampgroundModel.findByIdAndUpdate({_id: req.params.id}, {...req.body.campground})
     res.status(200).redirect(`/${editCamp._id}`)
 }))
@@ -40,7 +40,7 @@ router.get('/:id', catchAsync(async (req, res) => {
     res.status(200).json(camp)
 }))
 
-router.delete('/:id', isLoggedIn, isAuthor, catchAsync(async (req, res) => {
+router.delete('/:id', isLoggedIn, isCampgroundAuthor, catchAsync(async (req, res) => {
     const campground = await CampgroundModel.findById({_id: req.params.id}).populate('author')
     campground.delete()
     res.status(200).send({action: 'success'})
