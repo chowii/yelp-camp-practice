@@ -1,6 +1,6 @@
 const router = require('express').Router()
-const catchAsync = require('../../error/catchAsync')
-const UserModel = require('../data/userModel')
+const catchAsync = require('../error/catchAsync')
+const UserModel = require('./data/userModel')
 const passport = require('passport')
 
 router.post('/register', catchAsync(async (req, res) => {

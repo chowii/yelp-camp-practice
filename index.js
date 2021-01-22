@@ -6,7 +6,7 @@ const reviewRoute = require('./review')
 const ApiError = require('./error/ApiError')
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
-const userRoute = require('./user/routes/index')
+const userRoute = require('./user')
 const UserModel = require('./user/data/userModel')
 
 const PORT = 3000
