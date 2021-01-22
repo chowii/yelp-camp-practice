@@ -1,25 +1,15 @@
 const router = require('express').Router()
 const catchAsync = require('../error/catchAsync')
-const UserModel = require('./data/userModel')
 const passport = require('passport')
+const userController = require("./userController")
 
-router.post('/register', catchAsync(async (req, res) => {
-    const {email, username, password} = req.body
-    const user = new UserModel({email, username})
-    const registeredUser = await UserModel.register(user, password)
-    res.send(registeredUser)
-}))
+router.post('/register', catchAsync(userController.createNewUser))
 
 router.post(
     '/login',
     passport.authenticate('local', {}),
-    (req, res) => {
-        res.send(req.user);
-    })
+    (req, res) => res.send(req.user))
 
-router.post('/logout', (req, res) => {
-    req.logout()
-    res.redirect('/campgrounds')
-})
+router.post('/logout', userController.logout)
 
 module.exports = router
