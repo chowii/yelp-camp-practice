@@ -3,9 +3,13 @@ const catchAsync = require('../error/catchAsync')
 const passport = require('passport')
 const userController = require("./userController")
 
-router.post('/register', catchAsync((req, res) => {
-    const user = userController.createNewUser(req.body)
-    res.send(user)
+router.post('/register', catchAsync(async (req, res) => {
+    try {
+        const user = await userController.createNewUser(req.body)
+        res.send(user)
+    } catch (e) {
+        res.status(406).send(e)
+    }
 }))
 
 router.post(
