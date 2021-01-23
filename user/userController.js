@@ -1,13 +1,10 @@
 const UserModel = require('./data/userModel')
 
-module.exports.createNewUser = async (req, res) => {
-    const {email, username, password} = req.body
+module.exports.createNewUser = async ({email, username, password}) => {
     const user = new UserModel({email, username})
-    const registeredUser = await UserModel.register(user, password)
-    res.send(registeredUser)
+    return await UserModel.register(user, password)
 }
 
-module.exports.logout = (req, res) => {
-    req.logout()
-    res.redirect('/campgrounds')
+module.exports.logout = (user, logout) => {
+    if (user) logout()
 }
