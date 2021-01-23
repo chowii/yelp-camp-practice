@@ -1,4 +1,4 @@
-const router = require('express').Router({ mergeParams: true})
+const router = require('express').Router({mergeParams: true})
 const {reviewSchema} = require('./data/reviewSchema')
 const catchAsync = require('../error/catchAsync')
 const ApiError = require("../error/ApiError");
@@ -16,8 +16,21 @@ const validateReview = (req, res, next) => {
     }
 }
 
-router.post('/', validateReview, isLoggedIn, catchAsync(reviewController.createNewReview))
+router.post('/', validateReview, isLoggedIn, catchAsync(async (req, res) => {
+    const campgroundId = await reviewController.createNewReview({
+        campId: req.params.id,
+        review: req.body.review,
+        userId: req.user._id
+    })
+    res.redirect(`/campgrounds/${campgroundId}`)
+}))
 
-router.delete('/:reviewId', isLoggedIn, isReviewAuthor, catchAsync(reviewController.deleteReview))
+router.delete('/:reviewId', isLoggedIn, isReviewAuthor, catchAsync(async (req, res) => {
+    const campId = await reviewController.deleteReview({
+        compId: req.params.id,
+        reviewId: req.params.reviewId
+    })
+    res.redirect(`/campgrounds/${campId}`)
+}))
 
 module.exports = router;
